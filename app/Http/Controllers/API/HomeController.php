@@ -9,7 +9,7 @@
 	use App\Models\Banner;
 	use App\Models\Order;
 	use App\Models\Reason;
-	use App\Models\City;
+    use App\Models\City;
 	use App\User;
 	use Carbon\Carbon;
 	use Illuminate\Http\Request;
@@ -197,9 +197,9 @@
 
 						return response() -> json( [ 'value' => '1', 'key' => 'success', 'data' => $data ] );
 
-		}
-		
-		public function cities()
+        }
+        
+        		public function cities()
 		{
 			$cities = City::all();
 

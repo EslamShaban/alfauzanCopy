@@ -53,7 +53,7 @@
                         <div class="panel panel-body login-form">
                             <div class="text-center">
                                 <div class="icon-object border-slate-300 text-slate-300"><i class="icon-reading"></i></div>
-                                <h5 class="content-group"> تسجيل دخول <small class="display-block"> لوحة تحكم اوامر الشبكه </small></h5>
+                                <h5 class="content-group"> تسجيل دخول <small class="display-block"> لوحة تحكم مؤسسة ثروة </small></h5>
                             </div>
 
                             @if(count($errors)>0)
@@ -102,7 +102,7 @@
 
                     <!-- Footer -->
                     <div class="footer text-white">
-                        <a href="#" class="text-white">جميع الحقوق محفوظه أوامر الشبكه &copy; 2017. </a>
+                        <a href="#" class="text-white">جميع الحقوق محفوظه مؤسسة ثروة  &copy; 2017. </a>
                     </div>
                     <!-- /footer -->
 

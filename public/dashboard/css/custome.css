@@ -31,3 +31,7 @@
 {
 	display: none;
 }
+.login-cover {
+  background: url('../images/login_cover_2.jpg') !important no-repeat;
+  background-size: cover;
+}

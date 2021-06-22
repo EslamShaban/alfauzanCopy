@@ -28,6 +28,8 @@
 
         /******************* Register *******************/
 
+       
+
         public function register( Request $request )
         {
 
@@ -35,7 +37,7 @@
             $validator = Validator ::make( $request -> all(), [
                 'name'     => 'required',
                 'email'    => 'required',
-                // 'phone'    => 'required',
+                'phone'    => 'required',
                 'password' => 'required'
             ] );
 
@@ -65,16 +67,17 @@
                                                  'msg'   => trans( 'api.email_exist' ) ] );
                 }
 
-                $code = generate_code();
+                //$code = generate_code();
                 //add user to database
                 $user             = new User();
                 $user -> name     = $request -> name;
                 $user -> email    = $request -> email;
-                $user -> phone    = $code;
+                $user -> phone    = $request -> phone;
                 $user -> active   = 0;
-                $user -> code     = $code;
+                //$user -> code     = $code;
                 $user -> password = Hash ::make( $request -> password );
                 $user -> role     = 2;
+                $user -> active   = 1;  //added
                 $user -> save();
 
                 //send verivication code
@@ -172,6 +175,145 @@
                     return response() -> json( [ 'value' => '0', 'key' => 'fail', 'msg' => $msg ] );
                 }
             }
+        }
+        
+        
+                public function sendOtp(Request $request){
+
+            //make validation
+            $validator = Validator ::make( $request -> all(), [
+            'id'    => 'required|exists:users,id',
+            'phone'    => 'required',
+        ] );
+
+        // if validation pass
+        if ( $validator -> passes() ) 
+        {
+            //convert arabic numbers
+            $phone = convert2english( request( 'phone' ) );
+
+            if ( !valid_phone( $phone ) )
+                return response() -> json( [ 'value' => '0', 'key' => 'fail',
+                                            'msg'   => trans( 'api.wrong_phone' ) ] );
+
+
+            // check if phone exist
+            $unique = is_unique( 'phone', $phone );
+
+            if ( $unique ) {
+                return response() -> json( [ 'value' => '0', 'key' => 'fail',
+                                            'msg'   => trans( 'api.phone_exist' ) ] );
+            }
+
+            $code = generate_code();
+
+            $user = User ::find( $request -> id );
+            $user -> code    = $code;
+            $user -> save();
+
+            send_mobile_sms( $phone, 'كود التفعيل الخاص بك : ' . $user -> code );
+
+            return response() -> json( [ 'value' => '1', 'key' => 'success', 'msg' => trans( 'api.success' ), 'data' => $user -> code ] );
+
+        } else {
+
+            foreach ( (array)$validator -> errors() as $error ) {
+                {
+                    
+                    if ( isset( $error[ 'phone' ] ) ) {
+                        $msg = trans( 'api.phone_req' );
+                    } elseif ( isset( $error[ 'id' ] ) ){
+                        $msg = trans( 'api.no_user' );
+                    } else {
+                        $msg = trans( 'api.error' );
+                    }
+                }
+                return response() -> json( [ 'value' => '0', 'key' => 'fail', 'msg' => $msg ] );
+            }
+        }
+
+
+        }
+
+        public function updateUserPhone(Request $request)
+        {
+            //make validation
+            $validator = Validator ::make( $request -> all(), [
+            'id'    => 'required|exists:users,id',
+            'phone'    => 'required',
+            'code'     => 'required'
+        ] );
+
+        // if validation pass
+        if ( $validator -> passes() ) 
+        {
+            //convert arabic numbers
+            $phone = convert2english( request( 'phone' ) );
+            $code  = request( 'code' );
+
+            if ( !valid_phone( $phone ) )
+                return response() -> json( [ 'value' => '0', 'key' => 'fail',
+                                            'msg'   => trans( 'api.wrong_phone' ) ] );
+
+
+            // check if phone exist
+            $unique = is_unique( 'phone', $phone );
+
+            if ( $unique ) {
+                return response() -> json( [ 'value' => '0', 'key' => 'fail',
+                                            'msg'   => trans( 'api.phone_exist' ) ] );
+            }
+
+            $user = User ::find( $request -> id );
+            
+            
+            if( $user -> code == $code){
+
+                $user -> update( [ 'phone' => $phone, 'code' => null ] );
+                
+                $token = JWTAuth ::fromUser( $user );
+                $user -> update( [ 'jwt_token' => $token ] );
+                //				return $token;
+    
+    
+                //get user data
+                $data = [
+                    'name'   => $user -> name,
+                    'email'  => $user -> email,
+                    'phone'  => $user -> phone,
+                    'avatar' => url( 'dashboard/uploads/users/' . $user -> avatar ),
+                    'token'  => $token
+                ];
+    
+                return response() -> json( [ 'value' => '1', 'key' => 'success', 'msg' => trans( 'api.success' ),
+                                             'data'  => $data ] );
+
+            }else{
+
+                return response() -> json( [ 'value' => '0', 'key' => 'fail',
+                'msg'   => trans( 'api.wrong_code' ) ] );
+            }
+
+
+        } else {
+
+            foreach ( (array)$validator -> errors() as $error ) {
+                {
+                    
+                    if ( isset( $error[ 'phone' ] ) ) {
+                        $msg = trans( 'api.phone_req' );
+                    } elseif ( isset( $error[ 'id' ] ) ){
+                        $msg = trans( 'api.no_user' );
+                    } elseif ( isset( $error[ 'code' ] ) ){
+                        $msg = trans( 'api.code_req' );
+                    }else {
+                        $msg = trans( 'api.error' );
+                    }
+                }
+                return response() -> json( [ 'value' => '0', 'key' => 'fail', 'msg' => $msg ] );
+            }
+        }
+            
         }
 
         /******************* Login *******************/
@@ -581,6 +723,46 @@
             $user -> save();
 
             return response() -> json( [ 'value' => '1', 'key' => 'success', 'msg' => trans( 'api.logout' ) ] );
+
+        }
+        
+        public function social_login(Request $request)
+        {
+           
+
+                if ( $request -> has( 'phone' ) && $request -> phone != null ) {
+
+                    $user = User ::where( 'phone', $request -> phone )->orWhere('email', $request -> phone) -> first();
+
+                    if($user){
+
+                        //get user info
+                        $data = [
+                            'id'     => $user->id,
+                            'name'   => $user -> name,
+                            'email'  => $user -> email,
+                            'phone'  => $user -> phone,
+                            'avatar' => url( 'dashboard/uploads/users/' . $user -> avatar ),
+                            'token'  => $user -> jwt_token
+                        ];
+
+                        return response() -> json( [ 'value' => '1', 'key' => 'success', 'msg' => trans( 'api.success' ),
+                        'data'  => $data ] );
+
+                    }else{
+
+                        return response() -> json( [ 'value' => '0', 'key' => 'fail', 'msg' => trans( 'api.no_user' ) ] );
+
+                    }
+
+
+                }
+
+
+
+                return response() -> json( [ 'value' => '0', 'key' => 'fail', 'msg' => trans( 'api.email_or_phone_required' ) ] );
+
+
 
         }
 

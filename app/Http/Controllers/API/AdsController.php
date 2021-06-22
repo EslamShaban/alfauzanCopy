@@ -62,7 +62,7 @@
       if ($validator->passes()) {
 
 
-        $ads = Ads::with('review.user', 'image', 'view', 'user')->find($request->ads_id);
+        $ads = Ads::with('review.user', 'image', 'view')->find($request->ads_id);
         //if ads not exist
         if (!$ads)
           return response()->json(['value' => '0', 'key' => 'fail', 'msg' => trans('api.no_ads')]);
@@ -91,7 +91,6 @@
           'lng'          => $ads->lng,
           'details'      => $ads->details,
           'author_id'    => $ads->user_id,
-          'author_phone' => $ads->phone,
           //                'component'  => $ads -> component,
           'video'        => $ads->video ? getYoutubeVideoId($ads->video) : '',
           // 'link'         => 'https://fouzan.aait-sa.com/ad-info/' . $ads->id,
@@ -396,8 +395,7 @@
 
 
     }
-
-    public function ads()
+        public function ads(Request $request)
     {
 
 
@@ -405,15 +403,37 @@
         $user_data = JWTAuth::parseToken()->toUser();
         $user      = User::find($user_data->id);
 
+         if($request->has('category_id') && $request->category_id != null){
+          
+          $category_id = request('category_id');
+        
+             
+         }
+        
+
         if (!$user)
             return response()->json(['value' => '0', 'key' => 'fail', 'msg' => trans('api.no_user')]);
 
         
-        $ads = Ads::latest()->get();
+        if(isset($category_id) && $category_id != null){
+            
+
+          $ads = Ads::where('category_id', $category_id)->get();
+          
+        }else{
+
+          $ads = Ads::latest()->get();
+          
+         
+
+        }
         $favourites = Favourite::select('ads_id')->where('user_id', $user->id)->get();
 
         if(count($ads) == 0){
-            return response() -> json( [ 'value' => '1', 'key' => 'success', 'msg' => trans('api.no_ads_exist')]);
+          
+          $data[ 'ads' ] = null;
+            
+          return response() -> json( [ 'value' => '1', 'key' => 'success', 'msg' => trans('api.no_ads_exist'), 'data' => $data]);
 
         }
 
@@ -454,5 +474,4 @@
 
 
     }
-
   }

@@ -60,6 +60,12 @@
 			return $this->hasMany( 'App\Models\Notification', 'user_id', 'id' );
 		}
 
+		public function appointments()
+		{
+			return $this->belongsToMany( 'App\Models\Appointment', 'orders', 'user_id', 'id');
+		}
+
+
 		/**
 		 * Get the identifier that will be stored in the subject claim of the JWT.
 		 *

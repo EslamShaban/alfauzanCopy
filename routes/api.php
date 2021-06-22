@@ -12,8 +12,13 @@
 	Route ::any( 'reset-password', 'AuthController@resetPassword' );
 	Route ::any( 'code-check', 'AuthController@codeCheck' );
 
-	Route ::any( 'ads-info', 'AdsController@adsInfo' );
+	Route ::any( 'send-otp', 'AuthController@sendOtp' );
+	Route ::any( 'update-phone', 'AuthController@updateUserPhone' );
 
+	Route ::any( 'social_login', 'AuthController@social_login' );
+
+	Route ::any( 'ads-info', 'AdsController@adsInfo' );
+	
 	Route ::any( 'main-categories', 'SettingController@mainCategories' );
 	Route ::any( 'offer-categories', 'SettingController@offerCategories' );
 	Route ::any( 'project-categories', 'SettingController@projectCategories' );
@@ -27,11 +32,11 @@
 	Route ::any( 'ads_category', 'SearchController@ads_category' );
 	Route ::any( 'filter_ads', 'SearchController@filter_ads' );
 
+	Route ::any( 'filter_ads', 'SearchController@filter_ads' );
+
 	Route ::any( 'order-reasons', 'HomeController@orderReason' );
 	Route ::any( 'branches', 'HomeController@branches' );
 	Route ::any( 'banners', 'HomeController@banners' );
-	Route ::any( 'homescreen', 'HomeController@homescreen' );
-	Route ::any( 'cities', 'HomeController@cities' );
 
 
 	Route ::any( 'search', 'SearchController@search' );
@@ -42,7 +47,7 @@
 	Route ::any( 'project-ads', 'SearchController@projectAds' );
 
 	Route ::any( 'homescreen', 'HomeController@homescreen' );
-
+	Route ::any( 'cities', 'HomeController@cities' );
 
 	Route ::group( [ 'middleware' => [ 'jjwt', 'jwt.auth' ] ], function () {
 
@@ -65,10 +70,10 @@
 
 		Route ::any( 'notification', 'NotificationController@notify' );
 		Route ::any( 'notifilable', 'NotificationController@notifilable' );
-
+		
 		Route ::any( 'ads', 'AdsController@ads' );
 
-		
+
 		Route ::any( 'orders', 'AdsController@orders' );
 
 
@@ -76,6 +81,13 @@
 		Route ::any( 'add-job', 'SettingController@addJob' );
 
 
+		Route ::any( 'myOrder', 'orderController@myOrder' );
+
 
 	} );
 
+	Route ::any( 'doctor_info', 'doctorController@doctor_info' );
+	Route ::any( 'offers', 'categoryController@offers' );
+	Route ::any( 'order', 'orderController@Order' );
+	Route ::any( 'myOrder', 'orderController@myOrder' );
+	Route ::any( 'stars', 'doctorController@stars' );

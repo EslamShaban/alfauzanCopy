@@ -14,7 +14,6 @@ return array(
     'ChatTable' => $baseDir . '/database/migrations/2018_10_19_155331_chat_table.php',
     'ContactUsTable' => $baseDir . '/database/migrations/2017_12_04_165459_contact_us_table.php',
     'CreateBranchesTable' => $baseDir . '/database/migrations/2019_04_23_102451_create_branches_table.php',
-    'CreateCitiesTable' => $baseDir . '/database/migrations/2021_06_10_103134_create_cities_table.php',
     'CreateNotificationsTable' => $baseDir . '/database/migrations/2021_06_06_153121_create_notifications_table.php',
     'CreatePasswordResetsTable' => $baseDir . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
     'CreateUsersTable' => $baseDir . '/database/migrations/2014_10_12_000000_create_users_table.php',

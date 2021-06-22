@@ -39,16 +39,18 @@
                     $request['is_rent'] = 0;
 
                 // get all ads result
-                $ads = Ads ::with( 'image', 'category' )
+                $ads = Ads ::with( 'image', 'category', 'user')
                            -> where( 'active', 1 )
                            -> where( function ( $query ) use ( $request ) {
                                $query -> where( 'name_ar', 'like', '%' . $request -> keyword . '%' )
                                       -> orWhere( 'name_en', 'like', '%' . $request -> keyword . '%' );
-                           
-                                    } )
+
+                            } )
                            -> latest()
                            -> paginate( 10 );
 
+
+                
                 $name          = 'name_' . App ::getLocale();
                 $data          = [];
                 $data[ 'ads' ] = [];
@@ -67,10 +69,10 @@
                     $c[ 'is_rent' ]  = $ad -> is_rent;
                     $c[ 'no_tax' ]  = $ad -> no_tax;
                     $c[ 'details' ]  = $ad -> details;
+                    $c[ 'lat' ]  = $ad -> lat;
+                    $c[ 'lng' ]  = $ad -> lng;
                     $c[ 'author_id' ]  = $ad -> user_id;
                     $c[ 'author_phone' ]  = $ad->user->phone ;
-
-                    
                     $c[ 'image' ] = url( 'dashboard/uploads/adss/' . $ad -> image[ 0 ] -> image );
 
                     //check if ads is offer
@@ -116,7 +118,6 @@
             }
 
         }
-
         /******************* main ads *******************/
 
         public function mainAds( Request $request )
@@ -312,6 +313,49 @@
             }
 
         }
+
+        public function ads()
+        {
+            
+            $ads = Ads::latest()->get();
+
+            if(count($ads) == 0){
+                return response() -> json( [ 'value' => '1', 'key' => 'success', 'msg' => trans('api.no_ads_exist')]);
+
+            }
+
+
+            // custom data shape
+            $data          = [];
+            $data[ 'ads' ] = [];
+            $name          = 'name_' . App ::getLocale();
+
+            foreach ( $ads as $ad ) {
+
+               $c                      = collect();
+                $c[ 'id' ]              = $ad -> id;
+                $c[ 'name' ]            = $ad -> $name;
+                $c[ 'lat' ]             = $ad -> lat;
+                $c[ 'lng' ]             = $ad -> lng;
+                $c[ 'desc' ]            = $ad -> desc;
+                $c[ 'cost' ]            = $ad -> cost;
+                $c[ 'area' ]            = $ad -> area;
+                $c[ 'area_number' ]     = $ad -> area_number;
+                $c[ 'block_number' ]    = $ad -> block_number;
+                $c[ 'tax' ]             = $ad -> tax;
+                $c[ 'is_rent' ]         = $ad -> is_rent;
+                $c[ 'no_tax' ]          = $ad -> no_tax;
+                $c[ 'image' ]    = url( 'dashboard/uploads/adss/' . $ad -> image[ 0 ] -> image );
+
+                $data[ 'ads' ][] = $c;
+            }
+
+            
+            return response() -> json( [ 'value' => '1', 'key' => 'success', 'data' => $data ] );
+
+
+        }
+
 
         /******************* all offer *******************/
 
@@ -533,8 +577,8 @@
 
             }
         }
-
-        public function ads_category()
+        
+                public function ads_category()
         {
             
             $name          = 'name_' . App ::getLocale();
@@ -564,27 +608,27 @@
             $ads = Ads::query();
 
             
-            if($request->has('category_id')){
+            if($request->has('category_id') && $request->category_id != null){
                 $ads->where('category_id', $request->category_id);
             }
 
-            if($request->has('price_min')){
+            if($request->has('price_min') && $request->price_min != null ){
                 $ads->where('cost', '>=', $request->price_min);
             }
 
-            if($request->has('price_max')){
+            if($request->has('price_max') && $request->price_max != null ){
                 $ads->where('cost', '<=', $request->price_max);
             }
 
-            if($request->has('area_min')){
+            if($request->has('area_min') && $request->area_min != null ){
                 $ads->where('area', '>=', $request->area_min);
             }
 
-            if($request->has('area_max')){
+            if($request->has('area_max') && $request->area_max != null ){
                 $ads->where('area', '<=', $request->area_max);
             }
 
-            if($request->has('sort')){
+            if($request->has('sort') && $request->sort != null ){
 
                 if($request->sort == 'latest'){
 
@@ -597,6 +641,7 @@
                 }
             }
 
+
             $ads = $ads->get();
 
            if(count($ads)==0){
@@ -604,9 +649,17 @@
                 return response() -> json( [ 'value' => '1', 'key' => 'success', 'msg' => trans( 'api.no_ad' )  ] );
 
            }
+            
+            foreach($ads as $ad){
+                
+            $image_name = $ad->image()->first()->image ?? '';
+            $ad['image'] = $image_name == '' ? '' : url('dashboard/uploads/adss/'. $image_name);
 
-            $data['ads']=$ads;
 
+            }
+
+						
+            $data['ads'] = $ads;
 
             return response() -> json( [ 'value' => '1', 'key' => 'success', 'data' => $data ] );
 

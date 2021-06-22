@@ -10,4 +10,10 @@ class City extends Model
 
     protected $guarded = [];
 
+    public function doctors()
+    {
+
+        return $this->hasMany( 'App\Models\Doctor', 'doctor_id', 'id' );
+    }
+
 }

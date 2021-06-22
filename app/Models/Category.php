@@ -26,4 +26,10 @@
             return $this -> belongsToMany( 'App\Models\Project', 'projects_categories', 'category_id', 'project_id' );
         }
 
+        public function offers()
+        {
+    
+            return $this->hasMany( 'App\Models\Offer', 'category_id', 'id' );
+        }
+
     }
